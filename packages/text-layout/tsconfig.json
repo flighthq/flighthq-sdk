@@ -8,13 +8,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "references": [
-    { "path": "../assets" },
-    { "path": "../geometry" },
-    { "path": "../render-core" },
-    { "path": "../scenegraph-display" },
-    { "path": "../text-layout" },
-    { "path": "../types" }
-  ],
+  "references": [{ "path": "../types" }],
   "include": ["src"]
 }
