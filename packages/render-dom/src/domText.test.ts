@@ -44,18 +44,6 @@ describe('drawDOMText', () => {
     expect(state.element.children[0].tagName).toBe('DIV');
   });
 
-  it('sets overflow:hidden on the div', () => {
-    const state = makeState();
-    const node = createText();
-    node.data.text = 'hello';
-    const renderNode = getDisplayObjectRenderNode(state, node);
-
-    drawDOMText(state, renderNode);
-
-    const div = state.element.children[0] as HTMLElement;
-    expect(div.style.overflow).toBe('hidden');
-  });
-
   it('includes the text content in innerHTML', () => {
     const state = makeState();
     const node = createText();

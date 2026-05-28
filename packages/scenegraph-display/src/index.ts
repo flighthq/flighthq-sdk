@@ -1,4 +1,5 @@
 export * from './bitmap';
+export * from './filters';
 export * from './displayContainer';
 export * from './displayObject';
 export * from './domElement';

@@ -5,7 +5,7 @@ import { getDisplayObjectRuntime } from '@flighthq/scenegraph-display';
 import type { CanvasRenderState, DisplayObject, DisplayObjectRenderer, DisplayObjectRenderNode } from '@flighthq/types';
 
 import { drawCanvasBitmap } from './canvasBitmap';
-import { updateCanvasCacheBitmap } from './canvasCacheAsBitmap';
+import { drawCanvasCacheResult, updateCanvasCacheBitmap } from './canvasCacheAsBitmap';
 import { popCanvasClipRect, pushCanvasClipRect } from './canvasClipRect';
 import { applyCanvasMask, popCanvasMask, pushCanvasMask } from './canvasMask';
 import { setCanvasBlendMode } from './canvasMaterials';
@@ -66,31 +66,35 @@ export function renderCanvasDisplayObject(state: CanvasRenderState, source: Disp
     if (!shouldRender) continue;
 
     // ── Draw current object first (pre-order) ──
-    drawObject(state, data);
+    const childrenCached = drawObject(state, data);
 
-    // Then push children in forward order (so we pop & draw index 0 first)
-    const children = getDisplayObjectRuntime(current).children;
-    if (children !== null) {
-      // Push from last to first → pop gives index 0 first
-      for (let i = children.length - 1; i >= 0; i--) {
-        tempStack[stackLength++] = children[i] as DisplayObject;
+    // Skip children if they were captured into a cache bitmap this frame
+    if (!childrenCached) {
+      const children = getDisplayObjectRuntime(current).children;
+      if (children !== null) {
+        // Push from last to first → pop gives index 0 first
+        for (let i = children.length - 1; i >= 0; i--) {
+          tempStack[stackLength++] = children[i] as DisplayObject;
+        }
       }
     }
   }
 }
 
-function drawObject(state: CanvasRenderState, data: DisplayObjectRenderNode): void {
-  if (data.renderer === null) return;
+function drawObject(state: CanvasRenderState, data: DisplayObjectRenderNode): boolean {
+  if (data.renderer === null) return false;
   pushMaskObject(state, data);
   if (state.allowCacheAsBitmap) {
-    updateCanvasCacheBitmap(state, data);
-    if (data.cacheBitmap !== null) {
-      drawCanvasBitmap(state, data.cacheBitmap);
-      return;
+    const cacheResult = updateCanvasCacheBitmap(state, data);
+    if (cacheResult !== null) {
+      drawCanvasCacheResult(state, data, cacheResult);
+      popMaskObject(state, data);
+      return true;
     }
   }
   data.renderer.draw(state, data);
   popMaskObject(state, data);
+  return false;
 }
 
 function popMaskObject(

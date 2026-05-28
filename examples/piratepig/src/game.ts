@@ -4,6 +4,8 @@ import {
   beginFill,
   connectSignal,
   createDisplayObject,
+  createDropShadowFilter,
+  createGlowFilter,
   createShape,
   createText,
   createTween,
@@ -12,6 +14,7 @@ import {
   invalidateRender,
   playAudioSource,
   Quad,
+  setFilters,
 } from '@flighthq/engine';
 
 import type { Tile } from './tile';
@@ -56,6 +59,7 @@ export class PiratePigGame {
     scoreText.data.textFormat = { font: fontName, size: 60, color: 0x000000, align: 'right' };
     scoreText.x = CONTENT_WIDTH - 200;
     scoreText.y = 12;
+    setFilters(scoreText, [createDropShadowFilter(3, 45, 0x000000, 0.5, 4, 4)]);
     addChild(this.obj, scoreText);
     this.scoreText = scoreText;
 
@@ -64,6 +68,7 @@ export class PiratePigGame {
     beginFill(backgroundPanel, 0xffffff, 0.4);
     drawRect(backgroundPanel, 0, 0, CONTENT_WIDTH, CONTENT_HEIGHT);
     endFill(backgroundPanel);
+    setFilters(backgroundPanel, [createGlowFilter(0xffffff, 0.6, 10, 10)]);
     addChild(this.obj, backgroundPanel);
 
     const tileContainer = createDisplayObject();
